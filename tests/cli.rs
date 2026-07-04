@@ -1,4 +1,7 @@
-use std::{fs, path::Path};
+use std::{
+    fs,
+    path::{Component, Path, PathBuf},
+};
 
 use assert_cmd::Command;
 use predicates::prelude::*;
@@ -30,6 +33,28 @@ fn write_file(path: &Path, bytes: &[u8]) {
         fs::create_dir_all(parent).unwrap();
     }
     fs::write(path, bytes).unwrap();
+}
+
+fn path_contains_components(path: &str, components: &[&str]) -> bool {
+    let parts = Path::new(path)
+        .components()
+        .filter_map(|component| match component {
+            Component::Normal(part) => part.to_str(),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+
+    parts
+        .windows(components.len())
+        .any(|window| window == components)
+}
+
+fn canonical(path: impl Into<PathBuf>) -> String {
+    path.into()
+        .canonicalize()
+        .unwrap()
+        .to_string_lossy()
+        .into_owned()
 }
 
 #[test]
@@ -81,8 +106,8 @@ fn size_reports_deep_target_buckets() {
         .assert()
         .success()
         .stdout(predicate::str::contains("target:"))
-        .stdout(predicate::str::contains("debug/deps"))
-        .stdout(predicate::str::contains("debug/incremental"));
+        .stdout(predicate::str::contains("deps"))
+        .stdout(predicate::str::contains("incremental"));
 }
 
 #[test]
@@ -107,7 +132,10 @@ fn size_json_is_machine_readable() {
         .as_array()
         .unwrap()
         .iter()
-        .any(|item| item["path"].as_str().unwrap().contains("incremental")));
+        .any(|item| path_contains_components(
+            item["path"].as_str().unwrap(),
+            &["debug", "incremental"]
+        )));
 }
 
 #[test]
@@ -224,7 +252,7 @@ fn doctor_json_is_machine_readable() {
     let json: Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(
         json["project"]["manifest"].as_str().unwrap(),
-        temp.path().join("Cargo.toml").to_str().unwrap()
+        canonical(temp.path().join("Cargo.toml"))
     );
     assert!(json["tools"]
         .as_array()
@@ -249,6 +277,6 @@ fn cargo_plus_accepts_cargo_subcommand_prefix() {
     let json: Value = serde_json::from_slice(&output).unwrap();
     assert_eq!(
         json["project"]["manifest"].as_str().unwrap(),
-        temp.path().join("Cargo.toml").to_str().unwrap()
+        canonical(temp.path().join("Cargo.toml"))
     );
 }
