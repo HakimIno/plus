@@ -16,13 +16,28 @@ cargo install --path .
 From GitHub, once published:
 
 ```sh
-cargo install --git https://github.com/your-name/plus
+cargo install --git https://github.com/HakimIno/plus
+```
+
+This installs two executables:
+
+```text
+plus
+cargo-plus
+```
+
+So every command can be run in either style:
+
+```sh
+plus doctor
+cargo plus doctor
 ```
 
 ## Daily Use
 
 ```sh
 plus doctor
+cargo plus doctor
 plus init
 plus size --deep
 plus clean
@@ -172,6 +187,13 @@ cargo check --locked
 cargo test --locked
 cargo package --locked
 ```
+
+CI runs on Linux, macOS, and Windows. Tagged releases (`v*`) build archives for:
+
+- `x86_64-unknown-linux-gnu`
+- `x86_64-apple-darwin`
+- `aarch64-apple-darwin`
+- `x86_64-pc-windows-msvc`
 
 The intended scope is:
 

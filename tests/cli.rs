@@ -9,6 +9,10 @@ fn plus() -> Command {
     Command::cargo_bin("plus").expect("plus binary")
 }
 
+fn cargo_plus() -> Command {
+    Command::cargo_bin("cargo-plus").expect("cargo-plus binary")
+}
+
 fn fixture() -> TempDir {
     let temp = TempDir::new().expect("temp dir");
     fs::write(
@@ -228,4 +232,23 @@ fn doctor_json_is_machine_readable() {
         .iter()
         .any(|tool| tool["name"] == "cargo"));
     assert!(json["recommendations"].is_array());
+}
+
+#[test]
+fn cargo_plus_accepts_cargo_subcommand_prefix() {
+    let temp = fixture();
+
+    let output = cargo_plus()
+        .current_dir(temp.path())
+        .args(["plus", "doctor", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let json: Value = serde_json::from_slice(&output).unwrap();
+    assert_eq!(
+        json["project"]["manifest"].as_str().unwrap(),
+        temp.path().join("Cargo.toml").to_str().unwrap()
+    );
 }

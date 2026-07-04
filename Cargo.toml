@@ -9,6 +9,10 @@ readme = "README.md"
 keywords = ["rust", "cargo", "cli", "developer-tools", "workflow"]
 categories = ["command-line-utilities", "development-tools"]
 
+[[bin]]
+name = "cargo-plus"
+path = "src/bin/cargo-plus.rs"
+
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
