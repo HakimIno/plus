@@ -7,16 +7,34 @@ projects fast, clean, and correctly configured.
 
 ## Install
 
-From a local checkout:
+### Prerequisites
+
+You need Rust and Cargo installed first:
 
 ```sh
-cargo install --path .
+rustc --version
+cargo --version
 ```
 
-From GitHub, once published:
+Recommended installer:
+
+- Linux/macOS: <https://rustup.rs>
+- Windows: <https://rustup.rs> or `winget install Rustlang.Rustup`
+
+### From GitHub Source
+
+This works on Linux, macOS, and Windows:
 
 ```sh
 cargo install --git https://github.com/HakimIno/plus
+```
+
+### From A Local Checkout
+
+```sh
+git clone git@github.com:HakimIno/plus.git
+cd plus
+cargo install --path .
 ```
 
 This installs two executables:
@@ -31,6 +49,129 @@ So every command can be run in either style:
 ```sh
 plus doctor
 cargo plus doctor
+```
+
+### From Release Archives
+
+Tagged releases build archives for Linux, macOS, and Windows.
+
+Linux:
+
+```sh
+tar -xzf plus-x86_64-unknown-linux-gnu.tar.gz
+cd plus-x86_64-unknown-linux-gnu
+chmod +x plus cargo-plus
+./plus doctor
+```
+
+macOS Intel:
+
+```sh
+tar -xzf plus-x86_64-apple-darwin.tar.gz
+cd plus-x86_64-apple-darwin
+chmod +x plus cargo-plus
+./plus doctor
+```
+
+macOS Apple Silicon:
+
+```sh
+tar -xzf plus-aarch64-apple-darwin.tar.gz
+cd plus-aarch64-apple-darwin
+chmod +x plus cargo-plus
+./plus doctor
+```
+
+Windows PowerShell:
+
+```powershell
+Expand-Archive .\plus-x86_64-pc-windows-msvc.zip
+cd .\plus-x86_64-pc-windows-msvc\plus-x86_64-pc-windows-msvc
+.\plus.exe doctor
+```
+
+To use release binaries from anywhere, move them into a directory on your `PATH`.
+
+Linux/macOS example:
+
+```sh
+mkdir -p ~/.local/bin
+cp plus cargo-plus ~/.local/bin/
+```
+
+Windows example:
+
+```powershell
+mkdir $HOME\bin
+copy .\plus.exe $HOME\bin\
+copy .\cargo-plus.exe $HOME\bin\
+```
+
+Then add `$HOME\bin` to your user `Path` environment variable.
+
+### PATH Troubleshooting
+
+If `cargo install` succeeds but `plus` is not found, make sure Cargo's bin directory
+is on your `PATH`.
+
+Linux/macOS:
+
+```sh
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+Windows PowerShell:
+
+```powershell
+$env:Path += ";$HOME\.cargo\bin"
+```
+
+Permanent PATH setup depends on your shell or Windows user environment settings.
+
+### Optional Tools
+
+`plus` works without these, but it can use them when available:
+
+- `sccache` for compiler caching
+- `mold` or `lld` for faster linking
+- `bacon` or `cargo-watch` for a better dev loop
+- `cargo-nextest` for faster tests
+
+Run:
+
+```sh
+plus doctor
+plus setup
+```
+
+Platform hints:
+
+Linux Fedora:
+
+```sh
+sudo dnf install -y sccache mold lld
+cargo install bacon cargo-nextest
+```
+
+Linux Ubuntu/Debian:
+
+```sh
+sudo apt install -y sccache lld
+cargo install bacon cargo-nextest
+```
+
+macOS:
+
+```sh
+brew install sccache mold
+cargo install bacon cargo-nextest
+```
+
+Windows:
+
+```powershell
+winget install Mozilla.sccache
+cargo install bacon cargo-nextest
 ```
 
 ## Daily Use
