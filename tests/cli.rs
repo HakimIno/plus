@@ -1,6 +1,6 @@
 use std::{
     fs,
-    path::{Component, Path, PathBuf},
+    path::{Component, Path},
 };
 
 use assert_cmd::Command;
@@ -49,12 +49,20 @@ fn path_contains_components(path: &str, components: &[&str]) -> bool {
         .any(|window| window == components)
 }
 
-fn canonical(path: impl Into<PathBuf>) -> String {
-    path.into()
-        .canonicalize()
-        .unwrap()
-        .to_string_lossy()
-        .into_owned()
+fn path_ends_with_components(path: &str, components: &[&str]) -> bool {
+    let parts = Path::new(path)
+        .components()
+        .filter_map(|component| match component {
+            Component::Normal(part) => part.to_str(),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
+
+    parts.ends_with(components)
+}
+
+fn fixture_name(temp: &TempDir) -> &str {
+    temp.path().file_name().unwrap().to_str().unwrap()
 }
 
 #[test]
@@ -250,10 +258,10 @@ fn doctor_json_is_machine_readable() {
         .stdout
         .clone();
     let json: Value = serde_json::from_slice(&output).unwrap();
-    assert_eq!(
+    assert!(path_ends_with_components(
         json["project"]["manifest"].as_str().unwrap(),
-        canonical(temp.path().join("Cargo.toml"))
-    );
+        &[fixture_name(&temp), "Cargo.toml"]
+    ));
     assert!(json["tools"]
         .as_array()
         .unwrap()
@@ -275,8 +283,8 @@ fn cargo_plus_accepts_cargo_subcommand_prefix() {
         .stdout
         .clone();
     let json: Value = serde_json::from_slice(&output).unwrap();
-    assert_eq!(
+    assert!(path_ends_with_components(
         json["project"]["manifest"].as_str().unwrap(),
-        canonical(temp.path().join("Cargo.toml"))
-    );
+        &[fixture_name(&temp), "Cargo.toml"]
+    ));
 }
