@@ -1,0 +1,14 @@
+[commands]
+app = "cargo run"
+quick = "cargo check --workspace"
+
+[clean]
+max_target_size = "5GiB"
+
+[dev]
+prefer = "bacon"
+
+[tools]
+prefer_sccache = true
+prefer_fast_linker = true
+prefer_nextest = true
